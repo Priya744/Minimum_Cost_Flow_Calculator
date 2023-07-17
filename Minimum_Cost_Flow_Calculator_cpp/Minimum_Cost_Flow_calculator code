@@ -1,0 +1,60 @@
+#include<bits/stdc++.h>
+using namespace std; 
+
+class comp_people{
+public:
+    bool operator()(pair<string,int> p1,pair<string,int>p2){
+        return p1.second<p2.second;
+    }
+};
+
+int main(){
+    #ifndef ONLINE_JUDGE
+        freopen("input.txt","r",stdin);
+        freopen("output.txt","w",stdout);
+    #endif
+    int cnt=0;
+    map<string,int> mpp;
+    int amt,tot,people,i=0;
+    string m,n;
+    cin>>tot>>people;
+
+    //Step1: Inserting net amount for all enteries into ordered map 
+    while(tot--){
+        cin>>m>>n>>amt;
+        i++;
+        if(mpp.count(m)==0)mpp[m]=0;
+        if(mpp.count(n)==0)mpp[n]=0;
+        mpp[m]-=amt;
+        mpp[n]+=amt;
+    }
+    //Step2: Using multiset to store the records in sorted order
+    multiset<pair<string,int>, comp_people> st;
+    for(auto it : mpp){
+        string name=it.first;
+        int amt=it.second;
+        if(mpp[name]!=0){
+            st.insert(make_pair(name,amt));
+        }
+    }
+    //Step 3: Simplifying the settlements
+    while(!st.empty()){
+        auto recieve=st.begin();
+        auto give= prev(st.end());
+        int debit=recieve->second;
+        string debtp=recieve->first;
+        int credit=give->second;
+        string credp=give->first;
+        int famt=min(abs(debit),credit);
+        debit+=famt;
+        credit-=famt;
+        //printing the transaction between people
+        cout<<debtp<<" has to pay "<<famt<<" to "<<credp<<endl;
+        st.erase(recieve);
+        st.erase(give);
+        //Inserting the remaining amount back to multiset for calculation
+        if(debit!=0)st.insert(make_pair(debtp,debit));
+        if(credit!=0)st.insert(make_pair(credp,credit));
+        cnt++;
+    }
+}
